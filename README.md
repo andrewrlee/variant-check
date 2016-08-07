@@ -41,7 +41,7 @@ public class CheckerTest {
             .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
             .check(NAME, value(name -> name.equalsIgnoreCase("BOB")))
             // The following does not compile because type safety
-            // .check(NAME, Checker.<TestDto, Integer>value(yob -> yob  == 1906)) 
+            // .check(NAME, Checker.<TestDto, Integer>value(yob -> yob.equals(Integer.valueOf(1906)))) 
             .check(dto);
     
         
