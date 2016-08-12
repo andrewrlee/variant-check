@@ -29,12 +29,12 @@ public class CheckerTest {
                     "\nThe following assertion failed:\n" + 
                     "1) [yearOfBirth] expected:<190[5]> but was:<190[6]>\n");
 
-        // Can replace an existing test on a field which will  to pass for the new variant:
+        // Can replace an existing test on a field with `ensuring` which will then pass for the new variant:
         allChecks()
             .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
             .check(dto);
         
-        // `ensuring` allows operations on Consumer<AbstractObjectAssert>
+        // `ensuring` allows testing values with an AbstractObjectAssert
         // `check` allows type-safe custom checks to be registered,
         // e.g: -> `Checker.value(Consumer<T>)`:
         allChecks()
