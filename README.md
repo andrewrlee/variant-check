@@ -3,7 +3,6 @@
 Playing around with trying to test multiple variations of an object in an expressive way:
 
 ```java
-
 package uk.co.optimisticpanda.variantcheck;
 
 import static java.util.Arrays.asList;
@@ -33,17 +32,6 @@ public class CheckerTest {
         allChecks()
             .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
             .check(dto);
-        
-        // `ensuring` allows testing values with an AbstractObjectAssert
-        // `check` allows type-safe custom checks to be registered,
-        // e.g: -> `Checker.value(Consumer<T>)`:
-        allChecks()
-            .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
-            .check(NAME, value(name -> name.equalsIgnoreCase("BOB")))
-            // The following does not compile because type safety
-            // .check(NAME, Checker.<TestDto, Integer>value(yob -> yob.equals(Integer.valueOf(1906)))) 
-            .check(dto);
-    
         
         // ...Or can disable the existing test entirely:
         allChecks().ignoring(YEAR_OF_BIRTH).check(dto);
@@ -77,10 +65,31 @@ public class CheckerTest {
 }
 ```
 
+`ensuring` allows testing values with an AbstractObjectAssert, `check` allows type-safe custom checks to be registered:
+
+```java
+    private Check<ImmutableTestDto, Integer> intCheck(Consumer<IntegerAssert> consumer) { 
+        return (field, softly, value) -> consumer.accept(softly.assertThat(value));
+    }
+    
+    @Test
+    public void customTypeCheck() {
+        
+        ImmutableTestDto dto = defaultObjectUnderTest().withYearOfBirth(1906).create();
+        
+        allChecks()
+            .check(YEAR_OF_BIRTH, intCheck(yob -> yob
+                    .isNotZero()
+                    .isGreaterThanOrEqualTo(1906)))
+         // The following does not compile because type safety
+         // .check(NAME, intCheck(name -> name.isNotZero()))        
+            .check(dto);
+    }
+```
+
 This approach can also be applied to immutable objects and builders:
 
 ```java
-
    private Builder defaultObjectUnderTest() {
         return ImmutableTestDto.build()
                 .withName("Bob")
@@ -99,5 +108,4 @@ This approach can also be applied to immutable objects and builders:
             "1) [name] expected:<\"[Bob]\"> but was:<\"[Charles]\">\n" + 
             "2) [yearOfBirth] expected:<19[0]5> but was:<19[4]5>\n" + 
             "3) [possessions] expected:<[\"[Hat\", \"Bowie]\"]> but was:<[\"[Wrist Watch\", \"Pelican]\"]>\n");
-
 ```

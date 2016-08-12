@@ -3,10 +3,10 @@ package uk.co.optimisticpanda.variantcheck;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.co.optimisticpanda.variantcheck.Checker.value;
 import static uk.co.optimisticpanda.variantcheck.TestDtoFields.NAME;
 import static uk.co.optimisticpanda.variantcheck.TestDtoFields.POSESSIONS;
 import static uk.co.optimisticpanda.variantcheck.TestDtoFields.YEAR_OF_BIRTH;
+
 import org.junit.Test;
 
 public class CheckerTestWithMutableObjects {
@@ -31,17 +31,6 @@ public class CheckerTestWithMutableObjects {
         allChecks()
             .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
             .check(dto);
-        
-        // `ensuring` allows testing values with an AbstractObjectAssert
-        // `check` allows type-safe custom checks to be registered,
-        // e.g: -> `Checker.value(Consumer<T>)`:
-        allChecks()
-            .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
-            .check(NAME, value(name -> name.equalsIgnoreCase("BOB")))
-            // The following does not compile because type safety
-            // .check(NAME, Checker.<TestDto, Integer>value(yob -> yob.equals(Integer.valueOf(1906)))) 
-            .check(dto);
-    
         
         // ...Or can disable the existing test entirely:
         allChecks().ignoring(YEAR_OF_BIRTH).check(dto);

@@ -3,13 +3,16 @@ package uk.co.optimisticpanda.variantcheck;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.co.optimisticpanda.variantcheck.Checker.value;
 import static uk.co.optimisticpanda.variantcheck.ImmutableTestDtoFields.NAME;
 import static uk.co.optimisticpanda.variantcheck.ImmutableTestDtoFields.POSESSIONS;
 import static uk.co.optimisticpanda.variantcheck.ImmutableTestDtoFields.YEAR_OF_BIRTH;
 
+import java.util.function.Consumer;
+
+import org.assertj.core.api.IntegerAssert;
 import org.junit.Test;
 
+import uk.co.optimisticpanda.variantcheck.Checker.Check;
 import uk.co.optimisticpanda.variantcheck.ImmutableTestDto.Builder;
 
 public class CheckerTest {
@@ -35,17 +38,6 @@ public class CheckerTest {
             .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
             .check(dto);
         
-        // `ensuring` allows testing values with an AbstractObjectAssert
-        // `check` allows type-safe custom checks to be registered,
-        // e.g: -> `Checker.value(Consumer<T>)`:
-        allChecks()
-            .ensuring(YEAR_OF_BIRTH, yob -> yob.isEqualTo(1906))
-            .check(NAME, value(name -> name.equalsIgnoreCase("BOB")))
-            // The following does not compile because type safety
-            // .check(NAME, Checker.<TestDto, Integer>value(yob -> yob.equals(Integer.valueOf(1906)))) 
-            .check(dto);
-    
-        
         // ...Or can disable the existing test entirely:
         allChecks().ignoring(YEAR_OF_BIRTH).check(dto);
     
@@ -62,6 +54,25 @@ public class CheckerTest {
                     "3) [possessions] expected:<[\"[Hat\", \"Bowie]\"]> but was:<[\"[Wrist Watch\", \"Pelican]\"]>\n");
     }
 
+    
+    private Check<ImmutableTestDto, Integer> intCheck(Consumer<IntegerAssert> consumer) { 
+    	return (field, softly, value) -> consumer.accept(softly.assertThat(value));
+    }
+    
+    @Test
+    public void customTypeCheck() {
+    	
+        ImmutableTestDto dto = defaultObjectUnderTest().withYearOfBirth(1906).create();
+        
+        allChecks()
+            .check(YEAR_OF_BIRTH, intCheck(yob -> yob
+            		.isNotZero()
+            		.isGreaterThanOrEqualTo(1906)))
+         // The following does not compile because type safety
+         // .check(NAME, intCheck(name -> name.isNotZero()))		
+            .check(dto);
+    }
+    
     private Builder defaultObjectUnderTest() {
         return ImmutableTestDto.build()
                 .withName("Bob")
