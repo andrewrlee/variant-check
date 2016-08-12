@@ -18,7 +18,7 @@ public class CheckerTest {
         allChecks().check(defaultObjectUnderTest());
     
         // Create a variant of the object under test with a different field:
-        Generator<TestDto> dto = defaultObjectUnderTest().with(YEAR_OF_BIRTH, 1906);
+        TestDto dto = defaultObjectUnderTest().with(YEAR_OF_BIRTH, 1906).get();
         
         // default test suite does not pass on the new variant and throws an assertion error:
         assertThatThrownBy(
