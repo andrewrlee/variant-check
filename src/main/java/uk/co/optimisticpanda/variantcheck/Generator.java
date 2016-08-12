@@ -15,7 +15,7 @@ public class Generator<S> implements Supplier<S> {
 		this.factory = factory;
 	}
 	
-	public <T> Generator<S> with(Field<S, T> field, T val) {
+	public <T> Generator<S> with(MutableField<S, T> field, T val) {
 		fields.put(field.name(), new FieldAndValue<S, T>(field, val));
 		return this;
 	}
@@ -24,15 +24,15 @@ public class Generator<S> implements Supplier<S> {
 	public S get() {
 		S s = factory.get();
 		fields.values().forEach(value ->
-			((Field<S, Object>)value.field).apply(s, value.value));
+			((MutableField<S, Object>)value.field).apply(s, value.value));
 		return s;
 	}
 	
 	private static class FieldAndValue<S, T> {
-		private final Field<S, T> field;
+		private final MutableField<S, T> field;
 		private final T value;
 
-		private FieldAndValue(Field<S, T> field, T value) {
+		private FieldAndValue(MutableField<S, T> field, T value) {
 			this.field = field;
 			this.value = value;
 		}
@@ -50,7 +50,7 @@ public class Generator<S> implements Supplier<S> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			FieldAndValue other = (FieldAndValue) obj;
+			FieldAndValue<S, ?> other = (FieldAndValue<S, ?>) obj;
 			return Objects.equals(field, other.field);
 		}
 	}

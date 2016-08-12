@@ -1,19 +1,16 @@
 package uk.co.optimisticpanda.variantcheck;
 
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class Field<S, T> {
 	
 	private final String name;
 	private final Function<S, T> extractor;
-	private final BiConsumer<S, T> applier;
 	
-	public Field(String name, Function<S, T> extractor, BiConsumer<S, T> applier) {
+	public Field(String name, Function<S, T> extractor) {
 		this.name = name;
 		this.extractor = extractor;
-		this.applier = applier;
 	}
 	
 	public String name() {
@@ -22,10 +19,6 @@ public class Field<S, T> {
 	
 	public T extract(S s) {
 		return extractor.apply(s);
-	}
-	
-	public void apply(S s, T t) {
-		applier.accept(s, t);
 	}
 	
 	@Override
@@ -41,7 +34,7 @@ public class Field<S, T> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Field<S, T> other = (Field<S, T>) obj;
+		Field<?, ?> other = (Field<?, ?>) obj;
 		return Objects.equals(name, other.name);
 	}
 }

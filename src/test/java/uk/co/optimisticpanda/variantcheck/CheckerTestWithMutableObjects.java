@@ -1,17 +1,15 @@
-# variant-check
-
-Playing around with trying to test multiple variations of an object in an expressive way:
-
-```java
 
 package uk.co.optimisticpanda.variantcheck;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.co.optimisticpanda.variantcheck.Checker.value;
-import static uk.co.optimisticpanda.variantcheck.TestDtoFields.*;
+import static uk.co.optimisticpanda.variantcheck.TestDtoFields.NAME;
+import static uk.co.optimisticpanda.variantcheck.TestDtoFields.POSESSIONS;
+import static uk.co.optimisticpanda.variantcheck.TestDtoFields.YEAR_OF_BIRTH;
+import org.junit.Test;
 
-public class CheckerTest {
+public class CheckerTestWithMutableObjects {
 
     @Test
     public void test() {
@@ -75,29 +73,3 @@ public class CheckerTest {
                 .ensuring(POSESSIONS, possessions -> possessions.isEqualTo(asList("Hat", "Bowie")));
     }
 }
-```
-
-This approach can also be applied to immutable objects and builders:
-
-```java
-
-   private Builder defaultObjectUnderTest() {
-        return ImmutableTestDto.build()
-                .withName("Bob")
-                .withYearOfBirth(1905)
-                .withPossesions(asList("Hat", "Bowie"));
-   }
-
-   // If multiple tests fail, errors are reported for each failed test:
-   assertThatThrownBy(
-       () -> allChecks().check(defaultObjectUnderTest()
-               .withName("Charles")
-               .withYearOfBirth(1945)
-               .withPossesions(asList("Wrist Watch", "Pelican")).create()))
-       .isInstanceOf(AssertionError.class).hasMessage( 
-            "\nThe following 3 assertions failed:\n" + 
-            "1) [name] expected:<\"[Bob]\"> but was:<\"[Charles]\">\n" + 
-            "2) [yearOfBirth] expected:<19[0]5> but was:<19[4]5>\n" + 
-            "3) [possessions] expected:<[\"[Hat\", \"Bowie]\"]> but was:<[\"[Wrist Watch\", \"Pelican]\"]>\n");
-
-```
